@@ -9,12 +9,18 @@ db = mysql.connector.connect(
     password= '3915',
     port='3306',
     database = 'student_management_db',
-
 )
 
 mycursor = db.cursor()
 mycursor.execute('SELECT * FROM students')
 students = mycursor.fetchall()
+# ------SQL for insert user------
+# sql = "INSERT INTO students(name,id,class,address) VALUES (%s,%s,%s,%s)"
+# val = ("Sofikul",107,"JSC","Gazipur")
+# mycursor.execute(sql,val)
+# db.commit()
+
+
 
 # ---------GUI------------
 window = Tk()
@@ -45,8 +51,34 @@ title = Label(text="Student Management System",font = ("Arial",22,"bold"))
 title.grid(column=0, row=2)
 title_frame.grid(column=0,row=2, columnspan=6)
 
+
+
+# -----popup window-------------------------------------------------------------
+def popup():
+    top = Toplevel(window)
+    top.geometry("345x260")
+    top.config(padx=10,pady=10)
+    top.title("Add Student")
+    Label(top, text="Name ", font=('Arial 12 bold')).grid(column=0,row=0,sticky=W)
+    input = Entry(top,width=40).grid(column=1,row=0,ipady=3, pady=10,sticky=E)
+
+    Label(top, text="ID ", font=('Arial 12 bold')).grid(column=0, row=1, sticky=W)
+    input = Entry(top, width=40).grid(column=1, row=1,ipady=3, pady=10, sticky=E)
+
+    Label(top, text="Study ", font=('Arial 12 bold')).grid(column=0, row=2, sticky=W)
+    input = Entry(top, width=40).grid(column=1, row=2,ipady=3, pady=10, sticky=E)
+
+    Label(top, text="Address ", font=('Arial 12 bold')).grid(column=0, row=3, sticky=W)
+    input = Entry(top, width=40).grid(column=1, row=3, ipady=3, pady=10, sticky=E)
+
+    add = Button(top,text="ADD", width=15, style='btn.TButton')
+    add.grid(column=0, row=4,sticky="EW", pady=10, columnspan=2, ipady=5)
+
+
+
+
 #button------
-add_student = Button(text="Add Student", width=15,style='btn.TButton')
+add_student = Button(text="Add Student", width=15,style='btn.TButton', command=popup)
 update_student = Button(text="Update Student",width=15,style='btn.TButton')
 remove_student = Button(text="Remove Student",width=15,style='btn.TButton')
 
@@ -63,6 +95,14 @@ search_btn.grid(column=0, row=4,sticky="E", pady=10, columnspan=2, ipady=6)
 
 # ----------Text box--------
 box = Text(height=14,width=50,padx=11,pady=10)
+
+
+
+
+
+
+
+
 #---fetch data from database---
 for i in students:
     box.insert(END,f"Name: {i[0]}\n")
