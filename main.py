@@ -1,96 +1,84 @@
 import mysql.connector
 from tkinter import *
+from tkinter.ttk import *
+from tkinter import ttk
 from PIL import Image, ImageTk
-# db = mysql.connector.connect(
-#     host='localhost',
-#     user='root',
-#     password= '3915',
-#     port='3306',
-#     database = 'student_management_db',
-#
-# )
-#
-# mycursor = db.cursor()
-# mycursor.execute('SELECT * FROM students')
-# students = mycursor.fetchall()
-#
-# for i in students:
-#     print(f"Name: {i[0]}, ID: {i[1]}, Class: {i[2]}, Address: {i[3]}",end="\n")
+db = mysql.connector.connect(
+    host='localhost',
+    user='root',
+    password= '3915',
+    port='3306',
+    database = 'student_management_db',
+
+)
+
+mycursor = db.cursor()
+mycursor.execute('SELECT * FROM students')
+students = mycursor.fetchall()
 
 # ---------GUI------------
 window = Tk()
 window.title("Student Management System")
 window.config(padx=10, pady=10)
-# --canvas--
-canvas =Canvas(height=620,  width= 450)
+window.geometry('450x650')
+# ----style----
+
+s = Style()
+s.configure('frame1.TFrame', background='blue')
+s.configure('frame2.TFrame', background='yellow')
+s.configure('btn.TButton', font =('calibri', 12, 'bold'),foreground = 'black')
+
+# ----widget----
+img_frame = Frame(width=430, height=220)
+#--canvas--
+canvas =Canvas(height=215,  width= 425)
 img = Image.open('logo.png')
 r_img = img.resize((380,230))
 logo = ImageTk.PhotoImage(r_img)
-canvas.create_image(220,110, image=logo)
-canvas.grid(column = 0, row = 0, columnspan=6,rowspan=6)
+canvas.create_image(215,115, image=logo)
+canvas.grid(column = 0, row = 0)
 
-# title label--------
-title = Label(text="Student Management System",
-                # fg="yellow",
-                # bg="black",
-                font = ("Arial",22,"bold"))
-# title.place(relx = 0.05, rely = 0.40, anchor = 'sw')
+img_frame.grid(column=0, row=0,columnspan=6, rowspan=2)
+# title------
+title_frame = Frame(width=430, height=50)
+title = Label(text="Student Management System",font = ("Arial",22,"bold"))
+title.grid(column=0, row=2)
+title_frame.grid(column=0,row=2, columnspan=6)
 
-title.grid(column =0, row = 1, columnspan=6, rowspan=3)
+#button------
+add_student = Button(text="Add Student", width=15,style='btn.TButton')
+update_student = Button(text="Update Student",width=15,style='btn.TButton')
+remove_student = Button(text="Remove Student",width=15,style='btn.TButton')
 
-# --search bar--
-search = Entry(width=49)
+add_student.grid(column=0, row=3,sticky="W", columnspan=2, ipady=6)
+update_student.grid(column=0, row=3,sticky="E", columnspan=2, ipady=6)
+remove_student.grid(column=0, row=3, columnspan=2, ipady=6)
 
-search.grid(column = 1, row=2, columnspan=3, ipady=10,rowspan=2)
+# ------search bar---------
+search = Entry(width=45)
+search.grid(column = 0, row=4, columnspan=3,pady=10, sticky="W",ipady=8,rowspan=2)
 
+search_btn = Button(text="Search", width=15,style='btn.TButton')
+search_btn.grid(column=0, row=4,sticky="E", pady=10, columnspan=2, ipady=6)
 
-
-
-# ---button---
-search_student = Button(
-    text="Search",
-    width=15,
-    height=2,
-    bg="#00C8D3",
-    fg="black",
-    font=("Arial",11,"bold")
-)
-
-add_student = Button(
-    text="Add Student",
-    width=15,
-    height=2,
-    bg="#4C9930",
-    fg="white",
-    font=("Arial",11,"bold")
-)
-update_student = Button(
-    text="Update Student",
-    width=15,
-    height=2,
-    bg="#3F466E",
-    fg="white",
-    font=("Arial",11,"bold")
-)
-remove_student = Button(
-    text="Remove Student",
-    width=15,
-    height=2,
-    bg="#CF263B",
-    fg="white",
-    font=("Arial",11,"bold")
-)
+# ----------Text box--------
+box = Text(height=14,width=50,padx=11,pady=10)
+#---fetch data from database---
+for i in students:
+    box.insert(END,f"Name: {i[0]}\n")
+    box.insert(END, f"ID: {i[1]}\n")
+    box.insert(END, f"Study: {i[2]}\n")
+    box.insert(END, f"Address: {i[3]}\n")
+    box.insert(END,"\n\n")
+    # box.insert(END,f"Name: {i[0]}\n, ID: {i[1]}\n, Class: {i[2]}\n, Address: {i[3]}\n")
+box.grid(column=0, row=6, sticky='W',ipady=5)
 
 
-search_student.grid(column=4,row=2, columnspan=2,rowspan=2)
 
-add_student.grid(column=0,row=3, columnspan=2,rowspan=1)
-update_student.grid(column=2,row=3, columnspan=2,rowspan=1)
-remove_student.grid(column=4,row=3, columnspan=2,rowspan=1)
 
-# ---data---
-# box = Frame(width=100,height=150)
-# box.grid(column=0,row=4,columnspan=6)
+
+
+
 
 
 
