@@ -2,7 +2,9 @@ import mysql.connector
 from tkinter import *
 from tkinter.ttk import *
 from tkinter import ttk
+from tkinter import messagebox
 from PIL import Image, ImageTk
+
 db = mysql.connector.connect(
     host='localhost',
     user='root',
@@ -11,9 +13,10 @@ db = mysql.connector.connect(
     database = 'student_management_db',
 )
 
-mycursor = db.cursor()
-mycursor.execute('SELECT * FROM students')
-students = mycursor.fetchall()
+# mycursor = db.cursor()
+# mycursor.execute('SELECT * FROM students')
+# students = mycursor.fetchall()
+
 # ------SQL for insert user------
 # sql = "INSERT INTO students(name,id,class,address) VALUES (%s,%s,%s,%s)"
 # val = ("Sofikul",107,"JSC","Gazipur")
@@ -51,6 +54,11 @@ title = Label(text="Student Management System",font = ("Arial",22,"bold"))
 title.grid(column=0, row=2)
 title_frame.grid(column=0,row=2, columnspan=6)
 
+#------message---------
+def message(msg):
+    messagebox.showinfo("Important", f"{msg}")
+
+
 
 
 # -----popup window-------------------------------------------------------------
@@ -60,27 +68,73 @@ def popup():
     top.config(padx=10,pady=10)
     top.title("Add Student")
     Label(top, text="Name ", font=('Arial 12 bold')).grid(column=0,row=0,sticky=W)
-    input = Entry(top,width=40).grid(column=1,row=0,ipady=3, pady=10,sticky=E)
+    name = Entry(top,width=40)
+    name.grid(column=1,row=0,ipady=3, pady=10,sticky=E)
 
     Label(top, text="ID ", font=('Arial 12 bold')).grid(column=0, row=1, sticky=W)
-    input = Entry(top, width=40).grid(column=1, row=1,ipady=3, pady=10, sticky=E)
+    id = Entry(top, width=40)
+    id.grid(column=1, row=1,ipady=3, pady=10, sticky=E)
 
     Label(top, text="Study ", font=('Arial 12 bold')).grid(column=0, row=2, sticky=W)
-    input = Entry(top, width=40).grid(column=1, row=2,ipady=3, pady=10, sticky=E)
+    study = Entry(top, width=40)
+    study.grid(column=1, row=2,ipady=3, pady=10, sticky=E)
 
     Label(top, text="Address ", font=('Arial 12 bold')).grid(column=0, row=3, sticky=W)
-    input = Entry(top, width=40).grid(column=1, row=3, ipady=3, pady=10, sticky=E)
+    address = Entry(top, width=40)
+    address.grid(column=1, row=3, ipady=3, pady=10, sticky=E)
 
-    add = Button(top,text="ADD", width=15, style='btn.TButton')
+    add = Button(top,text="ADD", width=15, style='btn.TButton', command=lambda:[message("Added Suceessfully!"),insert(name,id,study,address)])
     add.grid(column=0, row=4,sticky="EW", pady=10, columnspan=2, ipady=5)
 
 
+# -----remove student popup------
+def remove_popup():
+    top = Toplevel(window)
+    top.geometry("345x130")
+    top.config(padx=10, pady=10)
+    top.title("Remove Student")
+    Label(top, text="ID ", font=('Arial 12 bold')).grid(column=0, row=0, sticky=W)
+    id = Entry(top, width=48)
+    id.grid(column=1, row=0, ipady=3, pady=10, sticky=E)
 
+    remove_btn = Button(top, text="REMOVE", width=15, style='btn.TButton',command=lambda:[message("Remove Successfully!"),remove(id)])
+    remove_btn.grid(column=0, row=4, sticky="EW", pady=10, columnspan=2, ipady=5)
+
+# ------Remove data from popup form------
+def remove(id):
+    s_id = id.get()
+    id_casting = int(s_id)
+
+    try:
+        with db.cursor() as cursor:
+            sql = "DELETE FROM students WHERE id=%s"
+            val = [(s_id,)]
+            cursor.executemany(sql,val)
+        db.commit()
+    finally:
+        db.close()
+
+
+# -------insert Data from popup form----
+def insert(name,id,study,address):
+    s_name = name.get()
+    s_id = id.get()
+    s_study = study.get()
+    s_address = address.get()
+    try:
+        with db.cursor() as cursor:
+            sql = "INSERT INTO students(name,id,class,address) VALUES (%s,%s,%s,%s)"
+            val = [(s_name,s_id,s_study,s_address)]
+            cursor.executemany(sql,val)
+        db.commit()
+    finally:
+        pass
+        # db.close()
 
 #button------
 add_student = Button(text="Add Student", width=15,style='btn.TButton', command=popup)
 update_student = Button(text="Update Student",width=15,style='btn.TButton')
-remove_student = Button(text="Remove Student",width=15,style='btn.TButton')
+remove_student = Button(text="Remove Student",width=15,style='btn.TButton',command=remove_popup)
 
 add_student.grid(column=0, row=3,sticky="W", columnspan=2, ipady=6)
 update_student.grid(column=0, row=3,sticky="E", columnspan=2, ipady=6)
@@ -104,12 +158,23 @@ box = Text(height=14,width=50,padx=11,pady=10)
 
 
 #---fetch data from database---
-for i in students:
-    box.insert(END,f"Name: {i[0]}\n")
-    box.insert(END, f"ID: {i[1]}\n")
-    box.insert(END, f"Study: {i[2]}\n")
-    box.insert(END, f"Address: {i[3]}\n")
-    box.insert(END,"\n\n")
+try:
+    with db.cursor() as cursor:
+        sql = "SELECT * FROM students"
+        cursor.execute(sql)
+        students = cursor.fetchall()
+        for i in students:
+            box.insert(END,f"Name: {i[0]}\n")
+            box.insert(END, f"ID: {i[1]}\n")
+
+            box.insert(END, f"Study: {i[2]}\n")
+            box.insert(END, f"Address: {i[3]}\n")
+            box.insert(END,"\n")
+
+finally:
+    # db.close()
+    pass
+
     # box.insert(END,f"Name: {i[0]}\n, ID: {i[1]}\n, Class: {i[2]}\n, Address: {i[3]}\n")
 box.grid(column=0, row=6, sticky='W',ipady=5)
 
