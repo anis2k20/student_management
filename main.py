@@ -13,17 +13,6 @@ db = mysql.connector.connect(
     database = 'student_management_db',
 )
 
-# mycursor = db.cursor()
-# mycursor.execute('SELECT * FROM students')
-# students = mycursor.fetchall()
-
-# ------SQL for insert user------
-# sql = "INSERT INTO students(name,id,class,address) VALUES (%s,%s,%s,%s)"
-# val = ("Sofikul",107,"JSC","Gazipur")
-# mycursor.execute(sql,val)
-# db.commit()
-
-
 
 # ---------GUI------------
 window = Tk()
@@ -57,8 +46,6 @@ title_frame.grid(column=0,row=2, columnspan=6)
 #------message---------
 def message(msg):
     messagebox.showinfo("Important", f"{msg}")
-
-
 
 
 # -----popup window-------------------------------------------------------------
@@ -100,10 +87,94 @@ def remove_popup():
     remove_btn = Button(top, text="REMOVE", width=15, style='btn.TButton',command=lambda:[message("Remove Successfully!"),remove(id)])
     remove_btn.grid(column=0, row=4, sticky="EW", pady=10, columnspan=2, ipady=5)
 
+
+# ---------update student popup---------
+def update_popup():
+    top = Toplevel(window)
+    top.geometry("400x260")
+    top.config(padx=10, pady=10)
+    top.title("Update Student Data")
+
+    Label(top, text="ID ", font=('Arial 12 bold')).grid(column=0, row=0, sticky=W)
+    id = Entry(top, width=35)
+    id.grid(column=1, row=0, ipady=3, pady=10, sticky=W)
+
+    def update(id,name,study,address):
+        id = id
+        name = name.get()
+        study = study.get()
+        address = address.get()
+
+        try:
+            with db.cursor() as cursor:
+                sql = f"UPDATE students SET name='{name}',class='{study}',address='{address}' WHERE id={id}"
+                cursor.execute(sql)
+            db.commit()
+        finally:
+            pass
+
+
+
+
+    def search_result(id):
+        id = id.get()
+        s_id = int(id)
+        try:
+            with db.cursor() as cursor:
+                sql = f"SELECT * FROM students WHERE id={s_id}"
+                cursor.execute(sql)
+                row = cursor.fetchall()
+
+                # empty field--------
+                Label(top, text="Name ", font=('Arial 12 bold')).grid(column=0, row=1, sticky=W)
+                name = Entry(top, width=35)
+                name.insert(0,f"{row[0][0]}")
+                name.grid(column=1, row=1, ipady=3, pady=10, sticky=W, columnspan=2)
+
+                Label(top, text="Study ", font=('Arial 12 bold')).grid(column=0, row=2, sticky=W)
+                study = Entry(top, width=35)
+                study.insert(0,f"{row[0][2]}")
+                study.grid(column=1, row=2, ipady=3, pady=10, sticky=W, columnspan=2)
+
+                Label(top, text="Address ", font=('Arial 12 bold')).grid(column=0, row=3, sticky=W)
+                address = Entry(top, width=35)
+                address.insert(0, f"{row[0][3]}")
+                address.grid(column=1, row=3, ipady=3, pady=10, sticky=W, columnspan=2)
+
+                update_btn = Button(top, text="UPDATE", width=15, style='btn.TButton', command=lambda:[update(s_id,name,study,address), message("Data Update Successfully!")])
+                update_btn.grid(column=0, row=4, sticky="EW", pady=10, columnspan=3, ipady=3)
+
+        finally:
+            # db.close()
+            pass
+
+
+    search_btn = Button(top, text="Search", width=10, style='btn.TButton',command=lambda: [search_result(id)])
+    search_btn.grid(column=2,row=0, sticky=E,pady=10, ipady=2)
+
+
+
+# -------------src result------
+def src_result(id):
+
+    id = id.get()
+    def info_message(rows):
+        messagebox.showinfo("Student Information",f"ID: {id}\nName: {rows[0][0]}\nStudy: {rows[0][2]}\nAddress: {rows[0][3]}")
+
+    try:
+        with db.cursor() as cursor:
+            sql = f"SELECT * FROM students WHERE id={id}"
+            cursor.execute(sql)
+            rows = cursor.fetchall()
+            info_message(rows)
+    finally:
+        pass
+
+
+
 # ------Remove data from popup form------
 def remove(id):
     s_id = id.get()
-    id_casting = int(s_id)
 
     try:
         with db.cursor() as cursor:
@@ -112,7 +183,7 @@ def remove(id):
             cursor.executemany(sql,val)
         db.commit()
     finally:
-        db.close()
+        pass
 
 
 # -------insert Data from popup form----
@@ -133,7 +204,7 @@ def insert(name,id,study,address):
 
 #button------
 add_student = Button(text="Add Student", width=15,style='btn.TButton', command=popup)
-update_student = Button(text="Update Student",width=15,style='btn.TButton')
+update_student = Button(text="Update Student",width=15,style='btn.TButton',command=update_popup)
 remove_student = Button(text="Remove Student",width=15,style='btn.TButton',command=remove_popup)
 
 add_student.grid(column=0, row=3,sticky="W", columnspan=2, ipady=6)
@@ -144,17 +215,11 @@ remove_student.grid(column=0, row=3, columnspan=2, ipady=6)
 search = Entry(width=45)
 search.grid(column = 0, row=4, columnspan=3,pady=10, sticky="W",ipady=8,rowspan=2)
 
-search_btn = Button(text="Search", width=15,style='btn.TButton')
+search_btn = Button(text="Search", width=15,style='btn.TButton',command=lambda:[src_result(search)])
 search_btn.grid(column=0, row=4,sticky="E", pady=10, columnspan=2, ipady=6)
 
 # ----------Text box--------
 box = Text(height=14,width=50,padx=11,pady=10)
-
-
-
-
-
-
 
 
 #---fetch data from database---
